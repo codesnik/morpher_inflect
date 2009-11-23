@@ -41,14 +41,14 @@ module MorpherInflect
     get = Inflection.new.get(word) rescue nil # если поднято исключение, переходим к третьему варианту и не кешируем
     case get
       when Array then 
-        # Яндекс вернул массив склонений
-        inflections = get
+        # Морфер вернул массив склонений
+        inflections = [word] + get
         # Кладем в кеш
         cache_store(word, inflections)
       when String then 
-        # Яндекс вернул не массив склонений (слово не найдено в словаре),
-        # а только строку, забиваем этой строкой весь массив 
-        inflections.fill(get, 0..INFLECTIONS_COUNT-1)
+        # Морфер вернул не массив склонений (слово не найдено в словаре),
+        # а только строку. Скорее всего это ошибка. Забиваем оригинальным словом
+        inflections.fill(word, 0..INFLECTIONS_COUNT-1)
         # Кладем в кеш
         cache_store(word, inflections)
       else

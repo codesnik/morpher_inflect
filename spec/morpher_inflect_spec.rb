@@ -2,7 +2,8 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe MorpherInflect do
   before(:all) do
-    @sample_inflection = ["рубин", "рубина", "рубину", "рубин", "рубином", "рубине"]
+    @sample_inflection_response = ["рубина", "рубину", "рубин", "рубином", "рубине"]
+    @sample_inflection = ["рубин"] + @sample_inflection_response
   end
   
   before(:each) do
@@ -11,7 +12,7 @@ describe MorpherInflect do
   end
 
   it "should return an array of inflections when webservice returns an array" do
-    @inflection.stub!(:get).and_return(@sample_inflection)
+    @inflection.stub!(:get).and_return(@sample_inflection_response)
     MorpherInflect::Inflection.should_receive(:new).and_return(@inflection)
     MorpherInflect.inflections("рубин").should == @sample_inflection
   end
@@ -36,7 +37,7 @@ describe MorpherInflect, "with caching" do
   end
 
   it "should cache successful lookups" do
-    sample = ["рубин", "рубина", "рубину", "рубин", "рубином", "рубине"]
+    sample = ["рубина", "рубину", "рубин", "рубином", "рубине"]
     @inflection.stub!(:get).and_return(sample)
     MorpherInflect::Inflection.should_receive(:new).once.and_return(@inflection)
     
@@ -67,7 +68,7 @@ describe MorpherInflect::Inflection do
     @sample_answer = {
       "ArrayOfString"=>{"string"=>["рубина", "рубину", "рубин", "рубином", "рубине"]}
     }
-    @sample_inflection = ["рубин", "рубина", "рубину", "рубин", "рубином", "рубине"]
+    @sample_inflection = ["рубина", "рубину", "рубин", "рубином", "рубине"]
   end
   
   it "should get inflections for a word" do
