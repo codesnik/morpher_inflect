@@ -4,12 +4,12 @@ require 'spec/rake/spectask'
 require 'rubygems/specification'
 require 'date'
 
-GEM = "yandex_inflect"
-GEM_VERSION = "0.0.2"
-AUTHOR = "Yaroslav Markin"
-EMAIL = "yaroslav@markin.net"
-HOMEPAGE = "http://github.com/yaroslav/yandex_inflect/"
-SUMMARY = "Yandex.Inflect webservice client (Russian language inflection)"
+GEM = "morpher_inflect"
+GEM_VERSION = "0.0.1"
+AUTHOR = "Alexey Trofimenko"
+EMAIL = "codesnik@gmail.com"
+HOMEPAGE = "http://github.com/codesnik/morpher_inflect/"
+SUMMARY = "Morpher.ru webservice client (Russian language inflection)"
 
 spec = Gem::Specification.new do |s|
   s.name = GEM
