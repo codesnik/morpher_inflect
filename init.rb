@@ -1,3 +1,3 @@
 # Rails plugin init
-require 'yandex_inflect'
+require 'morpher_inflect'
 

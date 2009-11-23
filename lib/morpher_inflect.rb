@@ -6,22 +6,22 @@ $:.unshift(File.dirname(__FILE__)) unless
 require 'rubygems'
 require 'httparty'
 
-module YandexInflect
+module MorpherInflect
   # Число доступных вариантов склонений
   INFLECTIONS_COUNT = 6
   
-  # Класс для получения данных с веб-сервиса Яндекса.
+  # Класс для получения данных с веб-сервиса Морфера.
   class Inflection
     include HTTParty
-    base_uri 'http://export.yandex.ru/'
+    base_uri 'http://morpher.ru/Webservices/Morpher.asmx/'
 
     # Получить склонения для имени <tt>name</tt>
-    def get(name)
+    def get(text)
       options = {}
-      options[:query] = { :name => name }
-      inflections = self.class.get("/inflect.xml", options)
+      options[:query] = { :s => text }
+      inflections = self.class.get("/GetForms", options)
       
-      return inflections["inflections"]["inflection"]
+      return inflections["ArrayOfString"]["string"]
     end
   end
   
