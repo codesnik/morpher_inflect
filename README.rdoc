@@ -1,23 +1,28 @@
-= YandexInflect
+= MorpherInflect
 
-Yandex.Inflect webservice client (provides Russian language pluralization)
+Morpher.ru webservice client (provides Russian language pluralization)
+based on yandex_inflect gem code for Yandex.Inflect webservice client
 
-Клиент сервиса Яндекс.Склонятор (склонение слов на русском языке)
+Клиент сервиса Morpher (склонение слов на русском языке)
 
-* http://nano.yandex.ru/project/inflect/
-* http://nano.yandex.ru/post/27/
+* http://morpher.ru
+
+Основан на yandex_inflect, имеет аналогичный API
+Сервис условно бесплатен (см. сайт автора), имеет ограничения. В отличие
+от яндекс.инфлект - склоняет и неодушевленные существительные
+(еду в "Ростов", а не в "Ростова").
 
 == Установка
 
 Установка в качестве gem (с GemCutter):
 
-  gem install yandex_inflect
+  gem install morpher_inflect
   
 == Использование
 
-  > YandexInflect.inflections("рубин")
+  > MorpherInflect.inflections("рубин")
   => ["рубин", "рубина", "рубину", "рубин", "рубином", "рубине"]
-  > YandexInflect.inflections("ЭтогоСловаНетВСловаре")
+  > MorpherInflect.inflections("ЭтогоСловаНетВСловаре")
   => ["ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре", 
       "ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре"]
   
@@ -25,9 +30,10 @@ Yandex.Inflect webservice client (provides Russian language pluralization)
 
 Успешные ответы от веб-сервиса кешируются, кеш можно очистить с помощью
 
-  > YandexInflect.clear_cache
+  > MorpherInflect.clear_cache
 
-== Автор
+== Авторы
 
-* Ярослав Маркин <yaroslav@markin.net>
+* оригинальный yandex_inflect: Ярослав Маркин <yaroslav@markin.net>
+* адаптация под morpher: Алексей Трофименко <codesnik@gmail.com>
 
