@@ -1,0 +1,4 @@
+## 0.0.2
+
+* ruby 1.9 compatibility
+* moved to 'bundle gem' packaging

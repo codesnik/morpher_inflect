@@ -1,5 +1,4 @@
-$KCODE = 'u'
-
+# encoding: utf-8
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
@@ -40,12 +39,12 @@ module MorpherInflect
     
     get = Inflection.new.get(word) rescue nil # если поднято исключение, переходим к третьему варианту и не кешируем
     case get
-      when Array then 
+      when Array
         # Морфер вернул массив склонений
         inflections = [word] + get
         # Кладем в кеш
         cache_store(word, inflections)
-      when String then 
+      when String
         # Морфер вернул не массив склонений (слово не найдено в словаре),
         # а только строку. Скорее всего это ошибка. Забиваем оригинальным словом
         inflections.fill(word, 0..INFLECTIONS_COUNT-1)

@@ -1,3 +1,4 @@
+# encoding: utf-8
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe MorpherInflect do
@@ -75,4 +76,5 @@ describe MorpherInflect::Inflection do
     MorpherInflect::Inflection.should_receive(:get).and_return(@sample_answer)
     MorpherInflect::Inflection.new.get("рубин").should == @sample_inflection
   end
+
 end
