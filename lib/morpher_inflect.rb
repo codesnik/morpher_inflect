@@ -8,66 +8,61 @@ require 'httparty'
 module MorpherInflect
   # Число доступных вариантов склонений
   INFLECTIONS_COUNT = 6
-  
+
   # Класс для получения данных с веб-сервиса Морфера.
   class Inflection
     include HTTParty
-    base_uri 'http://morpher.ru/Webservices/Morpher.asmx/'
+    base_uri 'ws3.morpher.ru'
 
     # Получить склонения для имени <tt>name</tt>
     def get(text)
       options = {}
-      options[:query] = { :s => text }
-      inflections = self.class.get("/GetForms", options)
-      
-      return inflections["ArrayOfString"]["string"]
+      options[:query] = { s: text, format: 'json' }
+      self.class.get("/russian/declension", options)
     end
   end
-  
+
   # Кеширование успешных результатов запроса к веб-сервису
   @@cache = {}
-  
+
   # Возвращает массив склонений (размером <tt>INFLECTIONS_COUNT</tt>) для слова <tt>word</tt>.
   #
   # Если слово не найдено в словаре, будет возвращен массив размерностью <tt>INFLECTIONS_COUNT</tt>,
   # заполненный этим словом.
   def self.inflections(word)
     inflections = []
-    
-    lookup = cache_lookup(word) 
+
+    lookup = cache_lookup(word)
     return lookup if lookup
-    
-    get = Inflection.new.get(word) rescue nil # если поднято исключение, переходим к третьему варианту и не кешируем
-    case get
-      when Array
-        # Морфер вернул массив склонений
-        inflections = [word] + get
-        # Кладем в кеш
-        cache_store(word, inflections)
-      when String
-        # Морфер вернул не массив склонений (слово не найдено в словаре),
-        # а только строку. Скорее всего это ошибка. Забиваем оригинальным словом
-        inflections.fill(word, 0..INFLECTIONS_COUNT-1)
+
+    response = Inflection.new.get(word) rescue nil # если поднято исключение
+    return inflections.fill(word, 0..INFLECTIONS_COUNT-1) if response.nil?
+
+    case response.code
+      when 200
+        # Морфер вернул хеш склонений
+        inflections = [word] + JSON.parse(response.body).values
         # Кладем в кеш
         cache_store(word, inflections)
       else
-        # Забиваем варианты склонений оригиналом
+        # Морфер вернул код ошибки (слово не найдено в словаре),
+        # Забиваем оригинальным словом
         inflections.fill(word, 0..INFLECTIONS_COUNT-1)
     end
- 
+
     inflections
   end
-  
+
   # Очистить кеш
   def self.clear_cache
     @@cache.clear
   end
-  
+
   private
     def self.cache_lookup(word)
       @@cache[word.to_s]
     end
-  
+
     def self.cache_store(word, value)
       @@cache[word.to_s] = value
     end
