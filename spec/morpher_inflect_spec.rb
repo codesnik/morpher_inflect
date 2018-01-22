@@ -2,79 +2,73 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe MorpherInflect do
-  before(:all) do
-    @sample_inflection_response = ["рубина", "рубину", "рубин", "рубином", "рубине"]
-    @sample_inflection = ["рубин"] + @sample_inflection_response
-  end
-  
+  let(:parsed_response) {
+    {
+        "Р" => "рубина",
+        "Д" => "рубину",
+        "В" => "рубин",
+        "Т" => "рубином",
+        "П" => "рубине",
+        "множественное" => {
+          "И" => "рубины",
+          "Р" => "рубинов",
+          "Д" => "рубинам",
+          "В" => "рубины",
+          "Т" => "рубинами",
+          "П" => "рубинах"
+        }
+      }
+    }
+  let(:sample_inflection) { %w(рубин рубина рубину рубин рубином рубине) }
+  let(:sample_dumb_inflection) { %w(рубин рубин рубин рубин рубин рубин) }
+  let(:inflector) { mock('MorpherInflect::Inflection') }
+  let(:response_code) { 200 }
+  let(:response) { mock('HTTParty::Response', code: response_code, parsed_response: parsed_response) }
+
   before(:each) do
-    @inflection = mock(:inflection)
     MorpherInflect::clear_cache
+    inflector.stub!(:get).and_return(response)
+    MorpherInflect::Inflection.stub!(:new).and_return(inflector)
   end
 
   it "should return an array of inflections when webservice returns an array" do
-    @inflection.stub!(:get).and_return(@sample_inflection_response)
-    MorpherInflect::Inflection.should_receive(:new).and_return(@inflection)
-    MorpherInflect.inflections("рубин").should == @sample_inflection
+    MorpherInflect.inflections("рубин").should == sample_inflection
   end
 
-  it "should return an array filled with identical strings when webservice returns an error string" do
-    @inflection.stub!(:get).and_return("Программа не может просклонять это словосочетание.")
-    MorpherInflect::Inflection.should_receive(:new).and_return(@inflection)
-    MorpherInflect.inflections("рубин").should == %w(рубин рубин рубин рубин рубин рубин)
+  context "when webservice returns an error string" do
+    let(:parsed_response) { {"code"=>5, "message"=>"Не найдено русских слов."} }
+    let(:response_code) { 496 }
+    it "should return an array filled with identical strings" do
+      MorpherInflect.inflections("рубин").should == sample_dumb_inflection
+    end
   end
 
   it "should return an array filled with identical strings of original word when webservice does not return anything meaningful or throws an exception" do
-    @inflection.stub!(:get).and_return(nil)
-    MorpherInflect::Inflection.should_receive(:new).and_return(@inflection)
-    MorpherInflect.inflections("рубин").should == %w(рубин рубин рубин рубин рубин рубин)
-  end
-end
-
-describe MorpherInflect, "with caching" do
-  before(:each) do
-    @inflection = mock(:inflection)
-    MorpherInflect::clear_cache
+    inflector.stub!(:get).and_raise(Errno::ECONNREFUSED)
+    MorpherInflect.inflections("рубин").should == sample_dumb_inflection
   end
 
-  it "should cache successful lookups" do
-    sample = ["рубина", "рубину", "рубин", "рубином", "рубине"]
-    @inflection.stub!(:get).and_return(sample)
-    MorpherInflect::Inflection.should_receive(:new).once.and_return(@inflection)
-    
-    2.times { MorpherInflect.inflections("рубин") }
-  end
-  
-  it "should NOT cache unseccussful lookups" do
-    sample = nil
-    @inflection.stub!(:get).and_return(sample)
-    MorpherInflect::Inflection.should_receive(:new).twice.and_return(@inflection)
-    
-    2.times { MorpherInflect.inflections("рубин") }
-  end
-  
-  it "should allow to clear cache" do
-    sample = "рубин"
-    @inflection.stub!(:get).and_return(sample)
-    MorpherInflect::Inflection.should_receive(:new).twice.and_return(@inflection)
-    
-    MorpherInflect.inflections("рубин")
-    MorpherInflect.clear_cache
-    MorpherInflect.inflections("рубин")
-  end
-end
+  context "with caching" do
+    it "should cache successful lookups" do
+      MorpherInflect::Inflection.should_receive(:new).once.and_return(inflector)
 
-describe MorpherInflect::Inflection do
-  before(:all) do
-    @sample_answer = {
-      "ArrayOfString"=>{"string"=>["рубина", "рубину", "рубин", "рубином", "рубине"]}
-    }
-    @sample_inflection = ["рубина", "рубину", "рубин", "рубином", "рубине"]
-  end
-  
-  it "should get inflections for a word" do
-    MorpherInflect::Inflection.should_receive(:get).and_return(@sample_answer)
-    MorpherInflect::Inflection.new.get("рубин").should == @sample_inflection
-  end
+      2.times { MorpherInflect.inflections("рубин") }
+    end
 
+    context "on unseccussful lookups" do
+      let(:response_code) { 496 }
+      it "should NOT cache result" do
+        MorpherInflect::Inflection.should_receive(:new).twice.and_return(inflector)
+        2.times { MorpherInflect.inflections("рубин") }
+      end
+    end
+
+    it "should allow to clear cache" do
+      MorpherInflect::Inflection.should_receive(:new).twice.and_return(inflector)
+
+      MorpherInflect.inflections("рубин")
+      MorpherInflect.clear_cache
+      MorpherInflect.inflections("рубин")
+    end
+  end
 end

@@ -8,8 +8,8 @@ describe MorpherInflect, "integration test" do
     it "should get inflections in correct encoding on ruby1.9" do
       inflections = MorpherInflect.inflections('тест')
       # real, not cached
-      inflections[5].should == 'тесте'
-      inflections[5].encoding.to_s.should == 'UTF-8'
+      inflections.last.should == 'тесте'
+      inflections.last.encoding.to_s.should == 'UTF-8'
     end
 
   end

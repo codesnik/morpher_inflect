@@ -12,12 +12,16 @@ based on yandex_inflect gem code for Yandex.Inflect webservice client
 от яндекс.инфлект - склоняет и неодушевленные существительные
 (еду в "Ростов", а не в "Ростова").
 
+В попытке сохранить совместимость с оригинальным API yandex_inflect, не использует
+многие новые возможности morpher.ru. Если у вас есть в них потребность,
+свяжитесь со мной (codesnik@gmail.com). Если вы написали другой, более свежий gem,
+тоже свяжитесь со мной, пожалуйста, я впишу его в это README.
+PR's are welcome!
+
 == Установка
 
-Установка в качестве gem (с GemCutter):
-
   gem install morpher_inflect
-  
+
 == Использование
 
   > MorpherInflect.inflections("рубин")
@@ -25,7 +29,7 @@ based on yandex_inflect gem code for Yandex.Inflect webservice client
   > MorpherInflect.inflections("ЭтогоСловаНетВСловаре")
   => ["ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре", 
       "ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре", "ЭтогоСловаНетВСловаре"]
-  
+
 Если во время общения с веб-сервисом произошла ошибка, возвращается массив, забитый оригинальной строкой.
 
 Успешные ответы от веб-сервиса кешируются, кеш можно очистить с помощью
@@ -36,4 +40,5 @@ based on yandex_inflect gem code for Yandex.Inflect webservice client
 
 * оригинальный yandex_inflect: Ярослав Маркин <yaroslav@markin.net>
 * адаптация под morpher: Алексей Трофименко <codesnik@gmail.com>
+* адаптация под morpher API version 3: github.com/ipcross
 

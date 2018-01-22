@@ -22,48 +22,53 @@ module MorpherInflect
     end
   end
 
-  # Кеширование успешных результатов запроса к веб-сервису
-  @@cache = {}
+  class << self
+    # Кеширование успешных результатов запроса к веб-сервису
+    @@cache = {}
 
-  # Возвращает массив склонений (размером <tt>INFLECTIONS_COUNT</tt>) для слова <tt>word</tt>.
-  #
-  # Если слово не найдено в словаре, будет возвращен массив размерностью <tt>INFLECTIONS_COUNT</tt>,
-  # заполненный этим словом.
-  def self.inflections(word)
-    inflections = []
+    # Возвращает массив склонений (им., род., дат., вин., твор., предл.) для слова word.
+    #
+    # Если слово не найдено в словаре, в массиве вместо всех склонений будет word.
+    # Повторяет исторический API gem yandex-inflect.
+    def inflections(word)
+      lookup = cache_lookup(word)
+      return lookup if lookup
 
-    lookup = cache_lookup(word)
-    return lookup if lookup
-
-    response = Inflection.new.get(word) rescue nil # если поднято исключение
-    return inflections.fill(word, 0..INFLECTIONS_COUNT-1) if response.nil?
-
-    case response.code
-      when 200
+      response = Inflection.new.get(word) rescue nil
+      if response && response.code == 200
         # Морфер вернул хеш склонений
-        inflections = [word] + JSON.parse(response.body).values
+        inflections = successful_result(word, response)
         # Кладем в кеш
         cache_store(word, inflections)
       else
         # Морфер вернул код ошибки (слово не найдено в словаре),
         # Забиваем оригинальным словом
-        inflections.fill(word, 0..INFLECTIONS_COUNT-1)
+        inflections = problematic_result(word)
+        # Не сохраняем в кэше, может в другой раз больше повезет.
+      end
+      inflections
     end
 
-    inflections
-  end
+    def clear_cache
+      @@cache.clear
+    end
 
-  # Очистить кеш
-  def self.clear_cache
-    @@cache.clear
-  end
+    private
 
-  private
-    def self.cache_lookup(word)
+    def successful_result(word, response)
+      [word] + response.parsed_response.values_at(*%W(Р Д В Т П))
+    end
+
+    def problematic_result(word)
+      Array.new(INFLECTIONS_COUNT, word)
+    end
+
+    def cache_lookup(word)
       @@cache[word.to_s]
     end
 
-    def self.cache_store(word, value)
+    def cache_store(word, value)
       @@cache[word.to_s] = value
     end
+  end
 end
